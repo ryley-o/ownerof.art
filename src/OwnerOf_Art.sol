@@ -1,35 +1,26 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.20;
 
+import {ReentrancyGuard} from "lib/openzeppelin-contracts/contracts/utils/ReentrancyGuard.sol";
 import {IERC721} from "lib/openzeppelin-contracts/contracts/token/ERC721/IERC721.sol";
 import {BytecodeStorageReader, BytecodeStorageWriter} from "lib/artblocks-contracts/packages/contracts/contracts/libs/v0.8.x/BytecodeStorageV1.sol";
 import {IDelegateRegistry} from "lib/delegate-registry/src/IDelegateRegistry.sol";
 
-contract OwnerOf_Art {
+import {IOwnerOf_Art} from "src/IOwnerOf_Art.sol";
+
+contract OwnerOf_Art is IOwnerOf_Art, ReentrancyGuard {
     using BytecodeStorageWriter for string;
     using BytecodeStorageReader for address;
-
-    event MessagePosted(address indexed tokenAddress, uint256 indexed tokenId, address indexed sender, address bytecodeStorageAddress);
     
     mapping (address tokenAddress => mapping(uint tokenId => Message[])) private _messages;
 
     // integrate with delegate.xyz v2
     address public DELEGATE_REGISTRY = 0x00000000000000447e69651d841bD8D104Bed493;
 
-    struct Message {
-        address bytecodeStorageAddress;
-        address sender;
-        uint40 timestamp;
-    }
+    constructor() ReentrancyGuard() {}
 
-    struct MessageView {
-        address bytecodeStorageAddress;
-        address sender;
-        uint40 timestamp;
-        string message;
-    }
-
-    function postMessage(address tokenAddress, uint256 tokenId, string memory message) public {
+    function postMessage(address tokenAddress, uint256 tokenId, string memory message) external nonReentrant {
+        // EFFECTS
         // write message to bytecode storage, push to messages storage array
         address bytecodeStorageAddress = message.writeToBytecode();
         _messages[tokenAddress][tokenId].push( Message({
@@ -59,7 +50,7 @@ contract OwnerOf_Art {
     }
 
     // @dev getMessages gas unbounded, use with caution, or use getMessageAtIndex for pagination
-    function getMessages(address tokenAddress, uint256 tokenId) public view returns (MessageView[] memory) {
+    function getMessages(address tokenAddress, uint256 tokenId) external view returns (MessageView[] memory) {
         Message[] storage messages = _messages[tokenAddress][tokenId];
         uint256 messagesLength = messages.length;
         MessageView[] memory messagesView = new MessageView[](messagesLength);
@@ -75,11 +66,11 @@ contract OwnerOf_Art {
         return messagesView;
     }
 
-    function getMessageCount(address tokenAddress, uint256 tokenId) public view returns (uint256) {
+    function getMessageCount(address tokenAddress, uint256 tokenId) external view returns (uint256) {
         return _messages[tokenAddress][tokenId].length;
     }
 
-    function getMessageAtIndex(address tokenAddress, uint256 tokenId, uint256 index) public view returns (MessageView memory) {
+    function getMessageAtIndex(address tokenAddress, uint256 tokenId, uint256 index) external view returns (MessageView memory) {
         Message storage message = _messages[tokenAddress][tokenId][index];
         return MessageView({
             bytecodeStorageAddress: message.bytecodeStorageAddress,
