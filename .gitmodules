@@ -1,0 +1,3 @@
+[submodule "ownerof.art/lib/forge-std"]
+	path = ownerof.art/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
