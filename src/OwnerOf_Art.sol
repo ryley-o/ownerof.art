@@ -8,6 +8,14 @@ import {IDelegateRegistry} from "lib/delegate-registry/src/IDelegateRegistry.sol
 
 import {IOwnerOf_Art} from "src/IOwnerOf_Art.sol";
 
+/**
+ * @title OwnerOf_Art
+ * @author ryley.eth (ryley-o.eth)
+ * @notice Contract for posting and retrieving messages about ERC721 tokens from their owners.
+ * Messages are intended to be used for provenance and attribution of art and other digital assets.
+ * Messages are stored in bytecode storage and may never be deleted or modified, but new messages may be posted.
+ * The contract is integrated with delegate.xyz v2 to allow owners to delegate posting messages to others.
+ */
 contract OwnerOf_Art is IOwnerOf_Art, ReentrancyGuard {
     using BytecodeStorageWriter for string;
     using BytecodeStorageReader for address;
