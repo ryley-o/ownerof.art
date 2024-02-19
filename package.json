@@ -5,6 +5,18 @@
   "main": "index.js",
   "repository": "https://github.com/ryley-o/ownerof.art.git",
   "author": "ryley-o <30364988+ryley-o@users.noreply.github.com>",
-  "license": "GPL 3.0",
-  "private": false
+  "license": "GPL-3.0",
+  "private": false,
+  "scripts": {
+    "deploy:sepolia": "yarn prepare:sepolia && graph deploy --product hosted-service ryley-o/ownerof-art-sepolia",
+    "prepare:sepolia": "mustache config/sepolia.json subgraph.template.yaml > subgraph.yaml"
+  },
+  "dependencies": {
+    "@graphprotocol/graph-cli": "^0.56.0",
+    "@graphprotocol/graph-ts": "^0.27.0"
+  },
+  "devDependencies": {
+    "assemblyscript": "^0.19.22",
+    "mustache": "^4.1.0"
+  }
 }

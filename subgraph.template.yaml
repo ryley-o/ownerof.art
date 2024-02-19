@@ -1,0 +1,28 @@
+specVersion: 0.0.2
+schema:
+  file: ./schema.graphql
+dataSources:
+  {{#iOwnerOf_ArtContracts}}
+  - kind: ethereum/contract
+    name: 'IOwnerOfArt{{#address}}-{{address}}{{/address}}'
+    network: {{network}}
+    source:
+      address: "{{#address}}{{address}}{{/address}}{{^address}}0x0000000000000000000000000000000000000000{{/address}}"
+      abi: IOwnerOf_Art
+      {{#startBlock}}startBlock: {{startBlock}}{{/startBlock}}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - Token
+        - Message
+      abis:
+        - name: IOwnerOf_Art
+          file: ./out/IOwnerOf_Art.sol/IOwnerOf_Art.json
+      eventHandlers:
+        - event: MessagePosted(indexed address,indexed uint256,indexed address,address)
+          handler: handleMessagePosted
+      file: ./subgraph_src/mappings.ts
+  {{/iOwnerOf_ArtContracts}}
+  

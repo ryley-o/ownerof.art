@@ -1,0 +1,10 @@
+{
+  "network": "sepolia",
+  "iOwnerOf_ArtContracts": [
+    {
+      "address": "0x00",
+      "name": "Sepolia",
+      "startBlock": 0
+    }
+  ]
+}

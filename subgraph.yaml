@@ -1,0 +1,26 @@
+specVersion: 0.0.2
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: 'IOwnerOfArt-0x00'
+    network: sepolia
+    source:
+      address: "0x00"
+      abi: IOwnerOf_Art
+      
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - Token
+        - Message
+      abis:
+        - name: IOwnerOf_Art
+          file: ./out/IOwnerOf_Art.sol/IOwnerOf_Art.json
+      eventHandlers:
+        - event: MessagePosted(indexed address,indexed uint256,indexed address,address)
+          handler: handleMessagePosted
+      file: ./subgraph_src/mappings.ts
+  

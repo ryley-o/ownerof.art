@@ -1,0 +1,43 @@
+type Token @entity {
+  "Unique identifier made up of contract address and token id"
+  id: ID!
+
+  "Address of the contract that the token is on"
+  contractAddress: Bytes!
+
+  "Token id of the token"
+  tokenId: BigInt!
+
+  "Messages that are associated with the token"
+  scripts: [Message!] @derivedFrom(field: "Token")
+}
+
+type Message @entity {
+  "unique identifier made up of the contract address, token id, and message index"
+  id: ID!
+
+  "Token that the message is associated with"
+  token: Token!
+
+  tokenAddress: Bytes!
+
+  tokenId: BigInt!
+
+  "Index of the message"
+  index: BigInt!
+
+  "Address of the owner who posted the message"
+  owner: Bytes!
+
+  "Content of the message"
+  message: String!
+
+  "Timestamp of the message"
+  timestamp: BigInt!
+
+  "Block number of the message"
+  blockNumber: BigInt!
+
+  "Bytecode Storage contract address for the message"
+  bytecodeAddress: Bytes!
+}
