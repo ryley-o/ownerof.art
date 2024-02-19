@@ -3,15 +3,18 @@ pragma solidity ^0.8.20;
 
 import {IERC721} from "lib/openzeppelin-contracts/contracts/token/ERC721/IERC721.sol";
 import {BytecodeStorageReader, BytecodeStorageWriter} from "lib/artblocks-contracts/packages/contracts/contracts/libs/v0.8.x/BytecodeStorageV1.sol";
+import {IDelegateRegistry} from "lib/delegate-registry/src/IDelegateRegistry.sol";
 
 contract OwnerOf_Art {
     using BytecodeStorageWriter for string;
     using BytecodeStorageReader for address;
+
+    event MessagePosted(address indexed tokenAddress, uint256 indexed tokenId, address indexed sender, address bytecodeStorageAddress);
     
     mapping (address tokenAddress => mapping(uint tokenId => Message[])) private _messages;
 
     // integrate with delegate.xyz v2
-    address public DELEGATION_REGISTRY = 0x00000000000000447e69651d841bD8D104Bed493;
+    address public DELEGATE_REGISTRY = 0x00000000000000447e69651d841bD8D104Bed493;
 
     struct Message {
         address bytecodeStorageAddress;
@@ -27,7 +30,7 @@ contract OwnerOf_Art {
     }
 
     function postMessage(address tokenAddress, uint256 tokenId, string memory message) public {
-        // write message to bytecode storage, push to messages array
+        // write message to bytecode storage, push to messages storage array
         address bytecodeStorageAddress = message.writeToBytecode();
         _messages[tokenAddress][tokenId].push( Message({
             bytecodeStorageAddress: bytecodeStorageAddress,
@@ -39,21 +42,23 @@ contract OwnerOf_Art {
         // gate to owner of token
         address tokenOwner = IERC721(tokenAddress).ownerOf(tokenId);
         if (tokenOwner != msg.sender) {
-            // check delegation registry
-IDelegateRegistry(DELEGATE_REGISTRY).checkDelegateForERC721(
-                msg.sender,
-                tokenOwner,
-                address(ORIGINAL_CONTRACT),
-                tokenId,
-                ""
-            );
-
-            // send message to owner
-            // emit event
+            // check delegate.xyz v2
+            bool isDelegate = IDelegateRegistry(DELEGATE_REGISTRY).checkDelegateForERC721({
+                to: msg.sender,
+                from: tokenOwner,
+                contract_: address(tokenAddress),
+                tokenId: tokenId,
+                rights: ""
+            });
+            require(isDelegate, "OwnerOf_Art: not owner or delegate");
         }
+
+        // EVENTS
+        emit MessagePosted(tokenAddress, tokenId, bytecodeStorageAddress, msg.sender);
 
     }
 
+    // @dev getMessages gas unbounded, use with caution, or use getMessageAtIndex for pagination
     function getMessages(address tokenAddress, uint256 tokenId) public view returns (MessageView[] memory) {
         Message[] storage messages = _messages[tokenAddress][tokenId];
         uint256 messagesLength = messages.length;
@@ -70,6 +75,10 @@ IDelegateRegistry(DELEGATE_REGISTRY).checkDelegateForERC721(
         return messagesView;
     }
 
+    function getMessageCount(address tokenAddress, uint256 tokenId) public view returns (uint256) {
+        return _messages[tokenAddress][tokenId].length;
+    }
+
     function getMessageAtIndex(address tokenAddress, uint256 tokenId, uint256 index) public view returns (MessageView memory) {
         Message storage message = _messages[tokenAddress][tokenId][index];
         return MessageView({
@@ -78,9 +87,5 @@ IDelegateRegistry(DELEGATE_REGISTRY).checkDelegateForERC721(
             timestamp: message.timestamp,
             message: message.bytecodeStorageAddress.readFromBytecode()
         });
-    }
-
-    function getMessageCount(address tokenAddress, uint256 tokenId) public view returns (uint256) {
-        return _messages[tokenAddress][tokenId].length;
     }
 }
