@@ -10,6 +10,9 @@ contract OwnerOf_Art {
     
     mapping (address tokenAddress => mapping(uint tokenId => Message[])) private _messages;
 
+    // integrate with delegate.xyz v2
+    address public DELEGATION_REGISTRY = 0x00000000000000447e69651d841bD8D104Bed493;
+
     struct Message {
         address bytecodeStorageAddress;
         address sender;
@@ -24,8 +27,6 @@ contract OwnerOf_Art {
     }
 
     function postMessage(address tokenAddress, uint256 tokenId, string memory message) public {
-        // gate to owner of token
-
         // write message to bytecode storage, push to messages array
         address bytecodeStorageAddress = message.writeToBytecode();
         _messages[tokenAddress][tokenId].push( Message({
@@ -33,6 +34,24 @@ contract OwnerOf_Art {
             sender: msg.sender,
             timestamp: uint40(block.timestamp)
         }) );
+
+        // INTERACTIONS
+        // gate to owner of token
+        address tokenOwner = IERC721(tokenAddress).ownerOf(tokenId);
+        if (tokenOwner != msg.sender) {
+            // check delegation registry
+IDelegateRegistry(DELEGATE_REGISTRY).checkDelegateForERC721(
+                msg.sender,
+                tokenOwner,
+                address(ORIGINAL_CONTRACT),
+                tokenId,
+                ""
+            );
+
+            // send message to owner
+            // emit event
+        }
+
     }
 
     function getMessages(address tokenAddress, uint256 tokenId) public view returns (MessageView[] memory) {
