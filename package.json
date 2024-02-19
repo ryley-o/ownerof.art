@@ -6,8 +6,5 @@
   "repository": "https://github.com/ryley-o/ownerof.art.git",
   "author": "ryley-o <30364988+ryley-o@users.noreply.github.com>",
   "license": "GPL 3.0",
-  "private": false,
-  "devDependencies": {
-    "@artblocks/contracts": "^1.1.0"
-  }
+  "private": false
 }
