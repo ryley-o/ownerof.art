@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.20;
 
+import {IERC721} from "lib/openzeppelin-contracts/contracts/token/ERC721/IERC721.sol";
 import {BytecodeStorageReader, BytecodeStorageWriter} from "node_modules/@artblocks/contracts/contracts/libs/v0.8.x/BytecodeStorageV1.sol";
 
 contract OwnerOf_Art {
