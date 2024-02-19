@@ -7,3 +7,6 @@
 [submodule "lib/artblocks-contracts"]
 	path = lib/artblocks-contracts
 	url = https://github.com/ArtBlocks/artblocks-contracts
+[submodule "lib/delegate-registry"]
+	path = lib/delegate-registry
+	url = https://github.com/delegatexyz/delegate-registry
