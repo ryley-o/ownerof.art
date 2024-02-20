@@ -2,14 +2,40 @@ type Token @entity {
   "Unique identifier made up of contract address and token id"
   id: ID!
 
-  "Address of the contract that the token is on"
-  contractAddress: Bytes!
+  "The contract that the token is on"
+  contract: Contract!
 
   "Token id of the token"
   tokenId: BigInt!
 
   "Messages that are associated with the token"
-  scripts: [Message!] @derivedFrom(field: "Token")
+  messages: [Message!] @derivedFrom(field: "token")
+
+  "Last update to the token or its messages"
+  updatedAt: BigInt!
+}
+
+type Contract @entity {
+  "Unique identifier made up of the contract address"
+  id: ID!
+
+  "Address of the contract"
+  address: Bytes!
+
+  "Name of the contract"
+  name: String!
+
+  "Symbol of the contract"
+  symbol: String!
+
+  "Tokens that are associated with the contract"
+  tokens: [Token!] @derivedFrom(field: "contract")
+
+  "Messages that are associated with the contract"
+  messages: [Message!] @derivedFrom(field: "contract")
+
+  "Last update to the contract or its tokens"
+  updatedAt: BigInt!
 }
 
 type Message @entity {
@@ -19,7 +45,8 @@ type Message @entity {
   "Token that the message is associated with"
   token: Token!
 
-  tokenAddress: Bytes!
+  "Address of the contract that the token is on"
+  contract: Contract!
 
   tokenId: BigInt!
 
@@ -32,12 +59,12 @@ type Message @entity {
   "Content of the message"
   message: String!
 
-  "Timestamp of the message"
-  timestamp: BigInt!
-
-  "Block number of the message"
-  blockNumber: BigInt!
-
   "Bytecode Storage contract address for the message"
   bytecodeAddress: Bytes!
+
+  "Block number of when the message was posted"
+  blockNumber: BigInt!
+
+  "Timestamp of when the message was posted"
+  timestamp: BigInt!
 }

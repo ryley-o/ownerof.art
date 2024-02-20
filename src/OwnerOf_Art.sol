@@ -3,6 +3,7 @@ pragma solidity ^0.8.20;
 
 import {ReentrancyGuard} from "lib/openzeppelin-contracts/contracts/utils/ReentrancyGuard.sol";
 import {IERC721} from "lib/openzeppelin-contracts/contracts/token/ERC721/IERC721.sol";
+import {IERC721Metadata} from "lib/openzeppelin-contracts/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 import {BytecodeStorageReader, BytecodeStorageWriter} from "lib/artblocks-contracts/packages/contracts/contracts/libs/v0.8.x/BytecodeStorageV1.sol";
 import {IDelegateRegistry} from "lib/delegate-registry/src/IDelegateRegistry.sol";
 
@@ -63,7 +64,13 @@ contract OwnerOf_Art is IOwnerOf_Art, ReentrancyGuard {
         }
 
         // EVENTS
-        emit MessagePosted({tokenAddress: tokenAddress, tokenId: tokenId, owner: tokenOwner, bytecodeStorageAddress: bytecodeStorageAddress);
+        emit MessagePosted({
+            tokenAddress: tokenAddress,
+            tokenId: tokenId,
+            owner: tokenOwner,
+            bytecodeStorageAddress: bytecodeStorageAddress,
+            index: _messages[tokenAddress][tokenId].length - 1
+        });
     }
 
     /**

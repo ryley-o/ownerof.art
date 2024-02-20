@@ -8,8 +8,10 @@
   "license": "GPL-3.0",
   "private": false,
   "scripts": {
-    "deploy:sepolia": "yarn prepare:sepolia && graph deploy --product hosted-service ryley-o/ownerof-art-sepolia",
-    "prepare:sepolia": "mustache config/sepolia.json subgraph.template.yaml > subgraph.yaml"
+    "subgraph:build:generic": "yarn subgraph:prepare:generic && graph codegen && graph build",
+    "subgraph:deploy:sepolia": "yarn subgraph:prepare:sepolia && graph codegen && graph deploy --product hosted-service ryley-o/ownerof-art-sepolia",
+    "subgraph:prepare:sepolia": "mustache config/sepolia.json subgraph.template.yaml > subgraph.yaml",
+    "subgraph:prepare:generic": "mustache config/generic.json subgraph.template.yaml > subgraph.yaml"
   },
   "dependencies": {
     "@graphprotocol/graph-cli": "^0.56.0",

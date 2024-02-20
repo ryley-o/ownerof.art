@@ -20,9 +20,10 @@ dataSources:
       abis:
         - name: IOwnerOf_Art
           file: ./out/IOwnerOf_Art.sol/IOwnerOf_Art.json
+        - name: IERC721Metadata
+          file: ./out/IERC721Metadata.sol/IERC721Metadata.json
       eventHandlers:
-        - event: MessagePosted(indexed address,indexed uint256,indexed address,address)
+        - event: MessagePosted(indexed address,indexed uint256,indexed address,address,uint256)
           handler: handleMessagePosted
       file: ./subgraph_src/mappings.ts
   {{/iOwnerOf_ArtContracts}}
-  

@@ -13,7 +13,7 @@ interface IOwnerOf_Art {
      * @param owner Address of the owner of the token sending the message
      * @param bytecodeStorageAddress Address of the bytecode storage contract where the message is stored
      */
-    event MessagePosted(address indexed tokenAddress, uint256 indexed tokenId, address indexed owner, address bytecodeStorageAddress);
+    event MessagePosted(address indexed tokenAddress, uint256 indexed tokenId, address indexed owner, address bytecodeStorageAddress, uint256 index);
 
     struct Message {
         address bytecodeStorageAddress;

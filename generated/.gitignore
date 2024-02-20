@@ -1,0 +1,2 @@
+# ignore contract-specific generated files
+*0x*/*.ts
