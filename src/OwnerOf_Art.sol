@@ -2,6 +2,7 @@
 pragma solidity ^0.8.20;
 
 import {ReentrancyGuard} from "lib/openzeppelin-contracts/contracts/utils/ReentrancyGuard.sol";
+import {Ownable} from "lib/openzeppelin-contracts/contracts/access/Ownable.sol";
 import {IERC721} from "lib/openzeppelin-contracts/contracts/token/ERC721/IERC721.sol";
 import {IERC721Metadata} from "lib/openzeppelin-contracts/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 import {IPunkOwnerOf} from "src/ref/IPunkOwnerOf.sol";
@@ -18,7 +19,7 @@ import {IOwnerOf_Art} from "src/IOwnerOf_Art.sol";
  * Messages are stored in bytecode storage and may never be deleted or modified, but new messages may be posted.
  * The contract is integrated with delegate.xyz v2 to allow owners to delegate posting messages to others.
  */
-contract OwnerOf_Art is IOwnerOf_Art, ReentrancyGuard {
+contract OwnerOf_Art is IOwnerOf_Art, Ownable, ReentrancyGuard {
     using BytecodeStorageWriter for string;
     using BytecodeStorageReader for address;
     
@@ -31,10 +32,11 @@ contract OwnerOf_Art is IOwnerOf_Art, ReentrancyGuard {
     // @dev Ethereum mainnet only
     address public CRYPTOPUNKS = 0xb47e3cd837dDF8e4c57F05d70Ab865de6e193BBB;
 
-    constructor() ReentrancyGuard() {}
+    constructor() Ownable(msg.sender) ReentrancyGuard() {}
 
     /**
      * @notice Post a new message about an ERC721 token.
+     * The function is payable to allow for tipping the admin of this contract for the service.
      * The function will revert if the sender is not the owner of the token or a delegate of the owner on delegate.xyz v2.
      * The message is stored in bytecode storage and the address of the storage contract is emitted in the MessagePosted event.
      * The message may never be deleted or modified, but new messages may be posted.
@@ -43,7 +45,7 @@ contract OwnerOf_Art is IOwnerOf_Art, ReentrancyGuard {
      * @param tokenId ID of the token being posted about
      * @param message Message to be posted about the token
      */
-    function postMessage(address tokenAddress, uint256 tokenId, string memory message) external nonReentrant {
+    function postMessage(address tokenAddress, uint256 tokenId, string memory message) external payable nonReentrant {
         // EFFECTS
         // write message to bytecode storage, push to messages storage array
         address bytecodeStorageAddress = message.writeToBytecode();
@@ -77,8 +79,21 @@ contract OwnerOf_Art is IOwnerOf_Art, ReentrancyGuard {
             tokenId: tokenId,
             owner: tokenOwner,
             bytecodeStorageAddress: bytecodeStorageAddress,
-            index: _messages[tokenAddress][tokenId].length - 1
+            index: _messages[tokenAddress][tokenId].length - 1,
+            tip: msg.value
         });
+    }
+
+    /**
+     * Function to enable the owner to drain tips from the contract to a specified address.
+     * Reverts if the caller is not the owner.
+     * @param to Address to drain funds to
+     */
+    function drainTipsTo(address payable to) external onlyOwner {
+        (bool success, ) = to.call{
+            value: address(this).balance
+        }("");
+        require(success, "drain payment failed");
     }
 
     /**

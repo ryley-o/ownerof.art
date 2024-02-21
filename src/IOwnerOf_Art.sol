@@ -12,8 +12,17 @@ interface IOwnerOf_Art {
      * @param tokenId ID of the token being posted about
      * @param owner Address of the owner of the token sending the message
      * @param bytecodeStorageAddress Address of the bytecode storage contract where the message is stored
+     * @param index Index of the message in the token's messages storage array
+     * @param tip Amount of ETH sent with the message to tip the admin of this contract for the service
      */
-    event MessagePosted(address indexed tokenAddress, uint256 indexed tokenId, address indexed owner, address bytecodeStorageAddress, uint256 index);
+    event MessagePosted(
+        address indexed tokenAddress,
+        uint256 indexed tokenId,
+        address indexed owner,
+        address bytecodeStorageAddress,
+        uint256 index,
+        uint256 tip
+    );
 
     struct Message {
         address bytecodeStorageAddress;
@@ -35,6 +44,7 @@ interface IOwnerOf_Art {
 
     /**
      * @notice Post a new message about an ERC721 token.
+     * The function is payable to allow for tipping the admin of this contract for the service.
      * The function will revert if the sender is not the owner of the token or a delegate of the owner on delegate.xyz v2.
      * The message is stored in bytecode storage and the address of the storage contract is emitted in the MessagePosted event.
      * The message may never be deleted or modified, but new messages may be posted.
@@ -43,7 +53,7 @@ interface IOwnerOf_Art {
      * @param tokenId ID of the token being posted about
      * @param message Message to be posted about the token
      */
-    function postMessage(address tokenAddress, uint256 tokenId, string memory message) external;
+    function postMessage(address tokenAddress, uint256 tokenId, string memory message) external payable;
 
     /**
      * @notice Get all messages posted about an ERC721 token.
