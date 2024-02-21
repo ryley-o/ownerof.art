@@ -145,3 +145,6 @@ dist
 
 # subgraph
 build/
+
+# generated
+subgraph.yaml
