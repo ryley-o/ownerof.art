@@ -26,11 +26,11 @@ contract OwnerOf_Art is IOwnerOf_Art, Ownable, ReentrancyGuard {
     mapping (address tokenAddress => mapping(uint tokenId => Message[])) private _messages;
 
     // integrate with delegate.xyz v2
-    address public DELEGATE_REGISTRY = 0x00000000000000447e69651d841bD8D104Bed493;
+    address public constant DELEGATE_REGISTRY = 0x00000000000000447e69651d841bD8D104Bed493;
 
     // override cryptopunks ownerOf function
     // @dev Ethereum mainnet only
-    address public CRYPTOPUNKS = 0xb47e3cd837dDF8e4c57F05d70Ab865de6e193BBB;
+    address private constant _CRYPTOPUNKS = 0xb47e3cd837dDF8e4c57F05d70Ab865de6e193BBB;
 
     constructor() Ownable(msg.sender) ReentrancyGuard() {}
 
@@ -58,8 +58,8 @@ contract OwnerOf_Art is IOwnerOf_Art, Ownable, ReentrancyGuard {
         // INTERACTIONS
         // gate to owner of token
         // @dev add support for cryptopunks non-standard ownerOf function
-        address tokenOwner = (tokenAddress == CRYPTOPUNKS)
-            ? IPunkOwnerOf(CRYPTOPUNKS).punkIndexToAddress(tokenId)
+        address tokenOwner = (tokenAddress == _CRYPTOPUNKS)
+            ? IPunkOwnerOf(_CRYPTOPUNKS).punkIndexToAddress(tokenId)
             : IERC721(tokenAddress).ownerOf(tokenId);
         if (tokenOwner != msg.sender) {
             // check delegate.xyz v2
