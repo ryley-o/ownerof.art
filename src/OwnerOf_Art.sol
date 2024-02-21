@@ -4,6 +4,7 @@ pragma solidity ^0.8.20;
 import {ReentrancyGuard} from "lib/openzeppelin-contracts/contracts/utils/ReentrancyGuard.sol";
 import {IERC721} from "lib/openzeppelin-contracts/contracts/token/ERC721/IERC721.sol";
 import {IERC721Metadata} from "lib/openzeppelin-contracts/contracts/token/ERC721/extensions/IERC721Metadata.sol";
+import {IPunkOwnerOf} from "src/ref/IPunkOwnerOf.sol";
 import {BytecodeStorageReader, BytecodeStorageWriter} from "lib/artblocks-contracts/packages/contracts/contracts/libs/v0.8.x/BytecodeStorageV1.sol";
 import {IDelegateRegistry} from "lib/delegate-registry/src/IDelegateRegistry.sol";
 
@@ -25,6 +26,10 @@ contract OwnerOf_Art is IOwnerOf_Art, ReentrancyGuard {
 
     // integrate with delegate.xyz v2
     address public DELEGATE_REGISTRY = 0x00000000000000447e69651d841bD8D104Bed493;
+
+    // override cryptopunks ownerOf function
+    // @dev Ethereum mainnet only
+    address public CRYPTOPUNKS = 0xb47e3cd837dDF8e4c57F05d70Ab865de6e193BBB;
 
     constructor() ReentrancyGuard() {}
 
@@ -50,13 +55,16 @@ contract OwnerOf_Art is IOwnerOf_Art, ReentrancyGuard {
 
         // INTERACTIONS
         // gate to owner of token
-        address tokenOwner = IERC721(tokenAddress).ownerOf(tokenId);
+        // @dev add support for cryptopunks non-standard ownerOf function
+        address tokenOwner = (tokenAddress == CRYPTOPUNKS)
+            ? IPunkOwnerOf(CRYPTOPUNKS).punkIndexToAddress(tokenId)
+            : IERC721(tokenAddress).ownerOf(tokenId);
         if (tokenOwner != msg.sender) {
             // check delegate.xyz v2
             bool isDelegate = IDelegateRegistry(DELEGATE_REGISTRY).checkDelegateForERC721({
                 to: msg.sender,
                 from: tokenOwner,
-                contract_: address(tokenAddress),
+                contract_: address(this),
                 tokenId: tokenId,
                 rights: ""
             });
