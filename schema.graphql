@@ -59,6 +59,9 @@ type Message @entity {
   "Content of the message"
   message: String!
 
+  "Tip amount sent with the message"
+  tip: BigInt!
+
   "Bytecode Storage contract address for the message"
   bytecodeAddress: Bytes!
 

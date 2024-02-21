@@ -315,6 +315,19 @@ export class Message extends Entity {
     this.set("message", Value.fromString(value));
   }
 
+  get tip(): BigInt {
+    let value = this.get("tip");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set tip(value: BigInt) {
+    this.set("tip", Value.fromBigInt(value));
+  }
+
   get bytecodeAddress(): Bytes {
     let value = this.get("bytecodeAddress");
     if (!value || value.kind == ValueKind.NULL) {

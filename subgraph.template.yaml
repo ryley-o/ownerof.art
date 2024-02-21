@@ -23,7 +23,7 @@ dataSources:
         - name: IERC721Metadata
           file: ./out/IERC721Metadata.sol/IERC721Metadata.json
       eventHandlers:
-        - event: MessagePosted(indexed address,indexed uint256,indexed address,address,uint256)
+        - event: MessagePosted(indexed address,indexed uint256,indexed address,address,uint256,uint256)
           handler: handleMessagePosted
       file: ./subgraph_src/mappings.ts
   {{/iOwnerOf_ArtContracts}}

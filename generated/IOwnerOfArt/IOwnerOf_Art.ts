@@ -7,7 +7,7 @@ import {
   Entity,
   Bytes,
   Address,
-  BigInt,
+  BigInt
 } from "@graphprotocol/graph-ts";
 
 export class MessagePosted extends ethereum.Event {
@@ -41,6 +41,10 @@ export class MessagePosted__Params {
 
   get index(): BigInt {
     return this._event.parameters[4].value.toBigInt();
+  }
+
+  get tip(): BigInt {
+    return this._event.parameters[5].value.toBigInt();
   }
 }
 
@@ -119,7 +123,7 @@ export class IOwnerOf_Art extends ethereum.SmartContract {
       [
         ethereum.Value.fromAddress(tokenAddress),
         ethereum.Value.fromUnsignedBigInt(tokenId),
-        ethereum.Value.fromUnsignedBigInt(index),
+        ethereum.Value.fromUnsignedBigInt(index)
       ]
     );
 
@@ -139,7 +143,7 @@ export class IOwnerOf_Art extends ethereum.SmartContract {
       [
         ethereum.Value.fromAddress(tokenAddress),
         ethereum.Value.fromUnsignedBigInt(tokenId),
-        ethereum.Value.fromUnsignedBigInt(index),
+        ethereum.Value.fromUnsignedBigInt(index)
       ]
     );
     if (result.reverted) {
@@ -159,7 +163,7 @@ export class IOwnerOf_Art extends ethereum.SmartContract {
       "getMessageCount(address,uint256):(uint256)",
       [
         ethereum.Value.fromAddress(tokenAddress),
-        ethereum.Value.fromUnsignedBigInt(tokenId),
+        ethereum.Value.fromUnsignedBigInt(tokenId)
       ]
     );
 
@@ -175,7 +179,7 @@ export class IOwnerOf_Art extends ethereum.SmartContract {
       "getMessageCount(address,uint256):(uint256)",
       [
         ethereum.Value.fromAddress(tokenAddress),
-        ethereum.Value.fromUnsignedBigInt(tokenId),
+        ethereum.Value.fromUnsignedBigInt(tokenId)
       ]
     );
     if (result.reverted) {
@@ -194,7 +198,7 @@ export class IOwnerOf_Art extends ethereum.SmartContract {
       "getMessages(address,uint256):((address,address,uint40,string)[])",
       [
         ethereum.Value.fromAddress(tokenAddress),
-        ethereum.Value.fromUnsignedBigInt(tokenId),
+        ethereum.Value.fromUnsignedBigInt(tokenId)
       ]
     );
 
@@ -212,7 +216,7 @@ export class IOwnerOf_Art extends ethereum.SmartContract {
       "getMessages(address,uint256):((address,address,uint40,string)[])",
       [
         ethereum.Value.fromAddress(tokenAddress),
-        ethereum.Value.fromUnsignedBigInt(tokenId),
+        ethereum.Value.fromUnsignedBigInt(tokenId)
       ]
     );
     if (result.reverted) {
