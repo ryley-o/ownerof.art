@@ -30,11 +30,13 @@ export function handleMessagePosted(event: MessagePosted): void {
     event.params.index
   );
   let message = new Message(messageEntityId);
-  message.contract = contract.id;
   message.token = token.id;
+  message.contract = contract.id;
+  message.tokenId = event.params.tokenId;
   message.index = event.params.index;
   message.owner = event.params.owner;
   message.message = getMessageString(
+    event.address,
     event.params.tokenAddress,
     token.tokenId,
     event.params.index
@@ -105,16 +107,13 @@ function getOrCreateToken(
 
 // this function is used to get the message text of a given post
 function getMessageString(
-  contractAddress: Address,
+  ownerOfArtAddress: Address,
+  tokenAddress: Address,
   tokenId: BigInt,
   index: BigInt
 ): string {
-  let iOwnerOfArt = IOwnerOf_Art.bind(contractAddress);
-  let message = iOwnerOfArt.try_getMessageAtIndex(
-    contractAddress,
-    tokenId,
-    index
-  );
+  let iOwnerOfArt = IOwnerOf_Art.bind(ownerOfArtAddress);
+  let message = iOwnerOfArt.try_getMessageAtIndex(tokenAddress, tokenId, index);
   if (message.reverted) {
     // this should never happen, but log a warning just in case
     log.warning("Failed to get message at index {} for token {}", [
