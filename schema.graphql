@@ -65,6 +65,9 @@ type Message @entity {
   "Bytecode Storage contract address for the message"
   bytecodeAddress: Bytes!
 
+  "Transaction hash of when the message was posted"
+  txHash: Bytes!
+
   "Block number of when the message was posted"
   blockNumber: BigInt!
 

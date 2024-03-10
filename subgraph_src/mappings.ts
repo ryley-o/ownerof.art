@@ -43,6 +43,7 @@ export function handleMessagePosted(event: MessagePosted): void {
   );
   message.tip = event.params.tip;
   message.bytecodeAddress = event.params.bytecodeStorageAddress;
+  message.txHash = event.transaction.hash;
   message.blockNumber = event.block.number;
   message.timestamp = event.block.timestamp;
 
