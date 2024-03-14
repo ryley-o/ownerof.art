@@ -148,3 +148,5 @@ build/
 
 # generated
 subgraph.yaml
+
+*.DS_Store
