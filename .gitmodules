@@ -10,3 +10,6 @@
 [submodule "lib/delegate-registry"]
 	path = lib/delegate-registry
 	url = https://github.com/delegatexyz/delegate-registry
+[submodule "lib/solady"]
+	path = lib/solady
+	url = https://github.com/vectorized/solady
