@@ -1,17 +1,19 @@
 ## Deployments
 
 ### command:
+
 ```bash
-ownerof.art % forge create --rpc-url <redacted> \
+forge create --rpc-url <redacted> \
     --<deployer wallet redacted> \
     --etherscan-api-key <redacted> \
     --verify src/ownerOf_Art.sol:OwnerOf_Art \
-    --libraries lib/artblocks-contracts/packages/contracts/contracts/libs/v0.8.x/BytecodeStorageV1.sol:BytecodeStorageReader:0x7497909537cE00fDda93c12d5083D8647C593c67
+    --libraries src/lib/BytecodeStorageV1Fork.sol:BytecodeStorageReader:0x478aC182d2B7902169a13fcD8A6a2fF885B4cEB5
 ```
 
-Contract address: 0xF7961080CF6c58ea8558E7161A6E58EeA51eA952
+Deployed to contract address: `0xc9bb9FEC6F4F673444a0Bc6dCA0DbB42604E0667`
 
 Verify the contract on etherscan
+
 ```bash
 forge verify-contract \
     --chain-id 11155111 \
@@ -19,7 +21,7 @@ forge verify-contract \
     --watch \
     --etherscan-api-key <redacted> \
     --compiler-version v0.8.21 \
-    0xF7961080CF6c58ea8558E7161A6E58EeA51eA952 \
+    0xc9bb9FEC6F4F673444a0Bc6dCA0DbB42604E0667 \
     src/OwnerOf_Art.sol:OwnerOf_Art \
-    --libraries lib/artblocks-contracts/packages/contracts/contracts/libs/v0.8.x/BytecodeStorageV1.sol:BytecodeStorageReader:0x7497909537cE00fDda93c12d5083D8647C593c67
+    --libraries src/lib/BytecodeStorageV1Fork.sol:BytecodeStorageReader:0x478aC182d2B7902169a13fcD8A6a2fF885B4cEB5
 ```

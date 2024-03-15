@@ -1,10 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.20;
 
-import {IERC721} from "lib/openzeppelin-contracts/contracts/token/ERC721/IERC721.sol";
-import {BytecodeStorageReader, BytecodeStorageWriter} from "lib/artblocks-contracts/packages/contracts/contracts/libs/v0.8.x/BytecodeStorageV1.sol";
-import {IDelegateRegistry} from "lib/delegate-registry/src/IDelegateRegistry.sol";
-
 interface IOwnerOf_Art {
     /**
      * Message posted event emitted when a message is posted about an ERC721 token by its owner (or delegate)
@@ -56,6 +52,19 @@ interface IOwnerOf_Art {
     function postMessage(address tokenAddress, uint256 tokenId, string memory message) external payable;
 
     /**
+     * @notice Post a new message about an ERC721 token.
+     * The function is payable to allow for tipping the admin of this contract for the service.
+     * The function will revert if the sender is not the owner of the token or a delegate of the owner on delegate.xyz v2.
+     * The message is stored in bytecode storage and the address of the storage contract is emitted in the MessagePosted event.
+     * The message may never be deleted or modified, but new messages may be posted.
+     * @dev Reentrant calls are prevented by the ReentrancyGuard modifier
+     * @param tokenAddress Address of the ERC721 token contract being posted about
+     * @param tokenId ID of the token being posted about
+     * @param messageCompressed Message to be posted about the token, compressed with flz compress
+     */
+    function postMessageCompressed(address tokenAddress, uint256 tokenId, bytes memory messageCompressed) external payable;
+
+    /**
      * @notice Get all messages posted about an ERC721 token.
      * @dev This function is gas unbounded and should be used with caution. For pagination, use getMessageAtIndex.
      * @param tokenAddress Address of the ERC721 token contract posted about
@@ -81,4 +90,13 @@ interface IOwnerOf_Art {
      * @return messageView MessageView struct containing the message posted about the token
      */
     function getMessageAtIndex(address tokenAddress, uint256 tokenId, uint256 index) external view returns (MessageView memory);
+
+    /**
+     * @notice Get the compressed form of a message string using flz compress. The compressed
+     * form of the message may be used as the input to postMessageCompressed for a more gas efficient
+     * way to post long messages.
+     * @param message string to compress
+     * @return bytes compressed form of the message
+     */
+    function getCompressedMessage(string memory message) external pure returns (bytes memory);
 }

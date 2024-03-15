@@ -2,9 +2,9 @@
   "network": "sepolia",
   "iOwnerOf_ArtContracts": [
     {
-      "address": "0xF7961080CF6c58ea8558E7161A6E58EeA51eA952",
+      "address": "0xc9bb9FEC6F4F673444a0Bc6dCA0DbB42604E0667",
       "name": "Sepolia",
-      "startBlock": 5332675
+      "startBlock": 5488753
     }
   ]
 }

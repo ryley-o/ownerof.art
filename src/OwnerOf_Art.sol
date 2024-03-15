@@ -6,8 +6,9 @@ import {Ownable} from "lib/openzeppelin-contracts/contracts/access/Ownable.sol";
 import {IERC721} from "lib/openzeppelin-contracts/contracts/token/ERC721/IERC721.sol";
 import {IERC721Metadata} from "lib/openzeppelin-contracts/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 import {IPunkOwnerOf} from "src/ref/IPunkOwnerOf.sol";
-import {BytecodeStorageReader, BytecodeStorageWriter} from "lib/artblocks-contracts/packages/contracts/contracts/libs/v0.8.x/BytecodeStorageV1.sol";
+import {BytecodeStorageReader, BytecodeStorageWriter} from "./lib/BytecodeStorageV1Fork.sol";
 import {IDelegateRegistry} from "lib/delegate-registry/src/IDelegateRegistry.sol";
+import { LibZip } from "lib/solady/src/utils/LibZip.sol";
 
 import {IOwnerOf_Art} from "src/IOwnerOf_Art.sol";
 
@@ -21,6 +22,7 @@ import {IOwnerOf_Art} from "src/IOwnerOf_Art.sol";
  */
 contract OwnerOf_Art is IOwnerOf_Art, Ownable, ReentrancyGuard {
     using BytecodeStorageWriter for string;
+    using BytecodeStorageWriter for bytes;
     using BytecodeStorageReader for address;
     
     mapping (address tokenAddress => mapping(uint tokenId => Message[])) private _messages;
@@ -49,6 +51,56 @@ contract OwnerOf_Art is IOwnerOf_Art, Ownable, ReentrancyGuard {
         // EFFECTS
         // write message to bytecode storage, push to messages storage array
         address bytecodeStorageAddress = message.writeToBytecode();
+        _messages[tokenAddress][tokenId].push( Message({
+            bytecodeStorageAddress: bytecodeStorageAddress,
+            sender: msg.sender,
+            timestamp: uint40(block.timestamp)
+        }) );
+
+        // INTERACTIONS
+        // gate to owner of token
+        // @dev add support for cryptopunks non-standard ownerOf function
+        address tokenOwner = (tokenAddress == _CRYPTOPUNKS)
+            ? IPunkOwnerOf(_CRYPTOPUNKS).punkIndexToAddress(tokenId)
+            : IERC721(tokenAddress).ownerOf(tokenId);
+        if (tokenOwner != msg.sender) {
+            // check delegate.xyz v2
+            bool isDelegate = IDelegateRegistry(DELEGATE_REGISTRY).checkDelegateForERC721({
+                to: msg.sender,
+                from: tokenOwner,
+                contract_: address(this),
+                tokenId: tokenId,
+                rights: ""
+            });
+            require(isDelegate, "OwnerOf_Art: not owner or delegate");
+        }
+
+        // EVENTS
+        emit MessagePosted({
+            tokenAddress: tokenAddress,
+            tokenId: tokenId,
+            owner: tokenOwner,
+            bytecodeStorageAddress: bytecodeStorageAddress,
+            index: _messages[tokenAddress][tokenId].length - 1,
+            tip: msg.value
+        });
+    }
+
+    /**
+     * @notice Post a new message about an ERC721 token.
+     * The function is payable to allow for tipping the admin of this contract for the service.
+     * The function will revert if the sender is not the owner of the token or a delegate of the owner on delegate.xyz v2.
+     * The message is stored in bytecode storage and the address of the storage contract is emitted in the MessagePosted event.
+     * The message may never be deleted or modified, but new messages may be posted.
+     * @dev Reentrant calls are prevented by the ReentrancyGuard modifier
+     * @param tokenAddress Address of the ERC721 token contract being posted about
+     * @param tokenId ID of the token being posted about
+     * @param messageCompressed Message to be posted about the token, compressed with flz compress
+     */
+    function postMessageCompressed(address tokenAddress, uint256 tokenId, bytes memory messageCompressed) external payable nonReentrant {
+        // EFFECTS
+        // write message to bytecode storage, push to messages storage array
+        address bytecodeStorageAddress = messageCompressed.writeToBytecodeCompressed();
         _messages[tokenAddress][tokenId].push( Message({
             bytecodeStorageAddress: bytecodeStorageAddress,
             sender: msg.sender,
@@ -145,5 +197,16 @@ contract OwnerOf_Art is IOwnerOf_Art, Ownable, ReentrancyGuard {
             timestamp: message.timestamp,
             message: message.bytecodeStorageAddress.readFromBytecode()
         });
+    }
+
+    /**
+     * @notice Get the compressed form of a message string using flz compress. The compressed
+     * form of the message may be used as the input to postMessageCompressed for a more gas efficient
+     * way to post long messages.
+     * @param message string to compress
+     * @return bytes compressed form of the message
+     */
+    function getCompressedMessage(string memory message) external pure returns (bytes memory) {
+        return LibZip.flzCompress(bytes(message));
     }
 }
