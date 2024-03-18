@@ -61,31 +61,10 @@ contract OwnerOf_Art is IOwnerOf_Art, Ownable, ReentrancyGuard {
         }) );
 
         // INTERACTIONS
-        // gate to owner of token
-        // @dev add support for cryptopunks non-standard ownerOf function
-        address tokenOwner = (tokenAddress == _CRYPTOPUNKS && block.chainid == 1)
-            ? IPunkOwnerOf(_CRYPTOPUNKS).punkIndexToAddress(tokenId)
-            : IERC721(tokenAddress).ownerOf(tokenId);
-        if (tokenOwner != msg.sender) {
-            // check delegate.xyz v2
-            bool isDelegate = IDelegateRegistry(DELEGATE_REGISTRY).checkDelegateForERC721({
-                to: msg.sender,
-                from: tokenOwner,
-                contract_: address(this),
-                tokenId: tokenId,
-                rights: ""
-            });
-            require(isDelegate, "OwnerOf_Art: not owner or delegate");
-        }
-
-        // EVENTS
-        emit MessagePosted({
+        _verifyOwnerOrDelegateAndEmitEvent({
             tokenAddress: tokenAddress,
             tokenId: tokenId,
-            owner: tokenOwner,
-            bytecodeStorageAddress: bytecodeStorageAddress,
-            index: _messages[tokenAddress][tokenId].length - 1,
-            tip: msg.value
+            bytecodeStorageAddress: bytecodeStorageAddress
         });
     }
 
@@ -111,31 +90,10 @@ contract OwnerOf_Art is IOwnerOf_Art, Ownable, ReentrancyGuard {
         }) );
 
         // INTERACTIONS
-        // gate to owner of token
-        // @dev add support for cryptopunks non-standard ownerOf function
-        address tokenOwner = (tokenAddress == _CRYPTOPUNKS)
-            ? IPunkOwnerOf(_CRYPTOPUNKS).punkIndexToAddress(tokenId)
-            : IERC721(tokenAddress).ownerOf(tokenId);
-        if (tokenOwner != msg.sender) {
-            // check delegate.xyz v2
-            bool isDelegate = IDelegateRegistry(DELEGATE_REGISTRY).checkDelegateForERC721({
-                to: msg.sender,
-                from: tokenOwner,
-                contract_: address(this),
-                tokenId: tokenId,
-                rights: ""
-            });
-            require(isDelegate, "OwnerOf_Art: not owner or delegate");
-        }
-
-        // EVENTS
-        emit MessagePosted({
+        _verifyOwnerOrDelegateAndEmitEvent({
             tokenAddress: tokenAddress,
             tokenId: tokenId,
-            owner: tokenOwner,
-            bytecodeStorageAddress: bytecodeStorageAddress,
-            index: _messages[tokenAddress][tokenId].length - 1,
-            tip: msg.value
+            bytecodeStorageAddress: bytecodeStorageAddress
         });
     }
 
@@ -211,5 +169,44 @@ contract OwnerOf_Art is IOwnerOf_Art, Ownable, ReentrancyGuard {
      */
     function getCompressedMessage(string memory message) external pure returns (bytes memory) {
         return LibZip.flzCompress(bytes(message));
+    }
+
+    /**
+     * Verify that the sender is the owner of the token or a delegate of the owner on delegate.xyz v2.
+     * If the sender is the owner or a delegate, emit a MessagePosted event.
+     * Reverts if the sender is not the owner or a delegate of the owner on delegate.xyz v2.
+     * @dev This function is used to avoid code duplication in the postMessage and postMessageCompressed functions.
+     * @param tokenAddress Address of the ERC721 token contract being posted about
+     * @param tokenId ID of the token being posted about
+     * @param bytecodeStorageAddress Address of the bytecode storage contract where the message was stored
+     */
+    function _verifyOwnerOrDelegateAndEmitEvent(address tokenAddress, uint256 tokenId, address bytecodeStorageAddress) internal {
+        // INTERACTIONS
+        // gate to owner of token
+        // @dev add support for cryptopunks non-standard ownerOf function
+        address tokenOwner = (tokenAddress == _CRYPTOPUNKS && block.chainid == 1)
+            ? IPunkOwnerOf(_CRYPTOPUNKS).punkIndexToAddress(tokenId)
+            : IERC721(tokenAddress).ownerOf(tokenId);
+        if (tokenOwner != msg.sender) {
+            // check delegate.xyz v2
+            bool isDelegate = IDelegateRegistry(DELEGATE_REGISTRY).checkDelegateForERC721({
+                to: msg.sender,
+                from: tokenOwner,
+                contract_: address(this),
+                tokenId: tokenId,
+                rights: ""
+            });
+            require(isDelegate, "OwnerOf_Art: not owner or delegate");
+        }
+
+        // EVENTS
+        emit MessagePosted({
+            tokenAddress: tokenAddress,
+            tokenId: tokenId,
+            owner: tokenOwner,
+            bytecodeStorageAddress: bytecodeStorageAddress,
+            index: _messages[tokenAddress][tokenId].length - 1,
+            tip: msg.value
+        });
     }
 }
