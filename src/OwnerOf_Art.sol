@@ -19,13 +19,14 @@ import {IOwnerOf_Art} from "src/IOwnerOf_Art.sol";
  * Messages are intended to be used for provenance and attribution of art and other digital assets.
  * Messages are stored in bytecode storage and may never be deleted or modified, but new messages may be posted.
  * The contract is integrated with delegate.xyz v2 to allow owners to delegate posting messages to others.
+ * Only ERC-721 and cryptopunks tokens are supported.
+ * The ERC-1155 standard is intentionally not supported in this contract to prevent one owner from posting
+ * messages about another owner's token, potentially negatively impacting other owners' assets without their consent.
  */
 contract OwnerOf_Art is IOwnerOf_Art, Ownable, ReentrancyGuard {
     using BytecodeStorageWriter for string;
     using BytecodeStorageWriter for bytes;
     using BytecodeStorageReader for address;
-    
-    mapping (address tokenAddress => mapping(uint tokenId => Message[])) private _messages;
 
     // integrate with delegate.xyz v2
     address public constant DELEGATE_REGISTRY = 0x00000000000000447e69651d841bD8D104Bed493;
@@ -33,6 +34,8 @@ contract OwnerOf_Art is IOwnerOf_Art, Ownable, ReentrancyGuard {
     // override cryptopunks ownerOf function
     // @dev Ethereum mainnet only
     address private constant _CRYPTOPUNKS = 0xb47e3cd837dDF8e4c57F05d70Ab865de6e193BBB;
+    
+    mapping (address tokenAddress => mapping(uint tokenId => Message[])) private _messages;
 
     constructor() Ownable(msg.sender) ReentrancyGuard() {}
 
@@ -60,7 +63,7 @@ contract OwnerOf_Art is IOwnerOf_Art, Ownable, ReentrancyGuard {
         // INTERACTIONS
         // gate to owner of token
         // @dev add support for cryptopunks non-standard ownerOf function
-        address tokenOwner = (tokenAddress == _CRYPTOPUNKS)
+        address tokenOwner = (tokenAddress == _CRYPTOPUNKS && block.chainid == 1)
             ? IPunkOwnerOf(_CRYPTOPUNKS).punkIndexToAddress(tokenId)
             : IERC721(tokenAddress).ownerOf(tokenId);
         if (tokenOwner != msg.sender) {
