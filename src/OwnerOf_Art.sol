@@ -4,7 +4,6 @@ pragma solidity ^0.8.20;
 import {ReentrancyGuard} from "lib/openzeppelin-contracts/contracts/utils/ReentrancyGuard.sol";
 import {Ownable} from "lib/openzeppelin-contracts/contracts/access/Ownable.sol";
 import {IERC721} from "lib/openzeppelin-contracts/contracts/token/ERC721/IERC721.sol";
-import {IERC721Metadata} from "lib/openzeppelin-contracts/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 import {IPunkOwnerOf} from "src/ref/IPunkOwnerOf.sol";
 import {BytecodeStorageReader, BytecodeStorageWriter} from "./lib/BytecodeStorageV1Fork.sol";
 import {IDelegateRegistry} from "lib/delegate-registry/src/IDelegateRegistry.sol";
@@ -15,8 +14,8 @@ import {IOwnerOf_Art} from "src/IOwnerOf_Art.sol";
 /**
  * @title OwnerOf_Art
  * @author ryley.eth (ryley-o.eth)
- * @notice Contract for posting and retrieving messages about ERC721 tokens from their owners.
- * Messages are intended to be used for provenance and attribution of art and other digital assets.
+ * @notice Contract that enables posting of provenance messages from owners of ERC-721 tokens.
+ * Messages are intended to be used for provenance of art and other digital assets.
  * Messages are stored in bytecode storage and may never be deleted or modified, but new messages may be posted.
  * The contract is integrated with delegate.xyz v2 to allow owners to delegate posting messages to others.
  * Only ERC-721 and cryptopunks tokens are supported.
@@ -29,6 +28,7 @@ contract OwnerOf_Art is IOwnerOf_Art, Ownable, ReentrancyGuard {
     using BytecodeStorageReader for address;
 
     // integrate with delegate.xyz v2
+    // @dev this is consistent across multiple networks
     address public constant DELEGATE_REGISTRY = 0x00000000000000447e69651d841bD8D104Bed493;
 
     // override cryptopunks ownerOf function
@@ -37,11 +37,13 @@ contract OwnerOf_Art is IOwnerOf_Art, Ownable, ReentrancyGuard {
     
     mapping (address tokenAddress => mapping(uint tokenId => Message[])) private _messages;
 
+    // assign deployer as owner in constructor. owner's only role is to drain tips or update owner,
+    // no other functionality is restricted to the owner, and owner cannot affect the posting or storage of messages.
     constructor() Ownable(msg.sender) ReentrancyGuard() {}
 
     /**
      * @notice Post a new message about an ERC721 token.
-     * The function is payable to allow for tipping the admin of this contract for the service.
+     * The function is payable to allow for tipping the owner of this contract for the service.
      * The function will revert if the sender is not the owner of the token or a delegate of the owner on delegate.xyz v2.
      * The message is stored in bytecode storage and the address of the storage contract is emitted in the MessagePosted event.
      * The message may never be deleted or modified, but new messages may be posted.
@@ -70,14 +72,15 @@ contract OwnerOf_Art is IOwnerOf_Art, Ownable, ReentrancyGuard {
 
     /**
      * @notice Post a new message about an ERC721 token.
-     * The function is payable to allow for tipping the admin of this contract for the service.
+     * The function is payable to allow for tipping the owner of this contract for the service.
      * The function will revert if the sender is not the owner of the token or a delegate of the owner on delegate.xyz v2.
      * The message is stored in bytecode storage and the address of the storage contract is emitted in the MessagePosted event.
      * The message may never be deleted or modified, but new messages may be posted.
      * @dev Reentrant calls are prevented by the ReentrancyGuard modifier
      * @param tokenAddress Address of the ERC721 token contract being posted about
      * @param tokenId ID of the token being posted about
-     * @param messageCompressed Message to be posted about the token, compressed with flz compress
+     * @param messageCompressed Message to be posted about the token, compressed with flz compress.
+     * Pure function getCompressedMessage may be used off-chain to compress a message prior to calling this function.
      */
     function postMessageCompressed(address tokenAddress, uint256 tokenId, bytes memory messageCompressed) external payable nonReentrant {
         // EFFECTS
@@ -176,6 +179,7 @@ contract OwnerOf_Art is IOwnerOf_Art, Ownable, ReentrancyGuard {
      * If the sender is the owner or a delegate, emit a MessagePosted event.
      * Reverts if the sender is not the owner or a delegate of the owner on delegate.xyz v2.
      * @dev This function is used to avoid code duplication in the postMessage and postMessageCompressed functions.
+     * @dev This function should be called within the context of a nonReentrant modifier.
      * @param tokenAddress Address of the ERC721 token contract being posted about
      * @param tokenId ID of the token being posted about
      * @param bytecodeStorageAddress Address of the bytecode storage contract where the message was stored
