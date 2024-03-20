@@ -31,6 +31,10 @@ contract OwnerOf_Art is IOwnerOf_Art, Ownable, ReentrancyGuard {
     // @dev this is consistent across multiple networks
     address public constant DELEGATE_REGISTRY = 0x00000000000000447e69651d841bD8D104Bed493;
 
+    // Use the following rights if desire to only delegate message posting operations:
+    // 0x3814eef715e47fefb0e782972afa908cd0f583157056c2497b8b05ca61c20a16
+    bytes32 public constant DELEGATE_RIGHTS = keccak256("OWNER_OF_ART");
+
     // override cryptopunks ownerOf function
     // @dev Ethereum mainnet only
     address private constant _CRYPTOPUNKS = 0xb47e3cd837dDF8e4c57F05d70Ab865de6e193BBB;
@@ -200,9 +204,9 @@ contract OwnerOf_Art is IOwnerOf_Art, Ownable, ReentrancyGuard {
             bool isDelegate = IDelegateRegistry(DELEGATE_REGISTRY).checkDelegateForERC721({
                 to: msg.sender,
                 from: tokenOwner,
-                contract_: address(this),
+                contract_: tokenAddress,
                 tokenId: tokenId,
-                rights: ""
+                rights: DELEGATE_RIGHTS
             });
             require(isDelegate, "OwnerOf_Art: not owner or delegate");
         }

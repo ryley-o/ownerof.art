@@ -39,6 +39,12 @@ interface IOwnerOf_Art {
     function DELEGATE_REGISTRY() external view returns (address);
 
     /**
+     * @dev DELEGATE_RIGHTS is the keccak256 hash of the string "OWNER_OF_ART", and may be used if the
+     * token owner only wants to allow delegates to post messages on this contract
+     */
+    function DELEGATE_RIGHTS() external view returns (bytes32);
+
+    /**
      * @notice Post a new message about an ERC721 token.
      * The function is payable to allow for tipping the admin of this contract for the service.
      * The function will revert if the sender is not the owner of the token or a delegate of the owner on delegate.xyz v2.
