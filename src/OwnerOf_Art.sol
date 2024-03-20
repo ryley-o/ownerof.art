@@ -37,9 +37,13 @@ contract OwnerOf_Art is IOwnerOf_Art, Ownable, ReentrancyGuard {
     
     mapping (address tokenAddress => mapping(uint tokenId => Message[])) private _messages;
 
-    // assign deployer as owner in constructor. owner's only role is to drain tips or update owner,
-    // no other functionality is restricted to the owner, and owner cannot affect the posting or storage of messages.
-    constructor() Ownable(msg.sender) ReentrancyGuard() {}
+    /**
+     * Assign the initial owner of the contract, as well as initialize the ReentrancyGuard.
+     * @dev The owner's only role is to drain tips or update the owner. No other functionality is restricted to the owner,
+     * and the owner cannot affect the posting or storage of messages.
+     * @param initialOwner Address to be set as the owner of the contract
+     */
+    constructor(address initialOwner) Ownable(initialOwner) ReentrancyGuard() {}
 
     /**
      * @notice Post a new message about an ERC721 token.
