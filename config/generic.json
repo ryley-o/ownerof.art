@@ -2,8 +2,8 @@
   "network": "sepolia",
   "iOwnerOf_ArtContracts": [
     {
-      "address": "0x0000000000000000000000000000000000000000",
-      "name": "Sepolia",
+      "address": "0x0000000042aBB12Bc4935734b69f9745B803E076",
+      "name": "OwnerOf_Art",
       "startBlock": 0
     }
   ]
