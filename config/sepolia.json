@@ -2,7 +2,7 @@
   "network": "sepolia",
   "iOwnerOf_ArtContracts": [
     {
-      "address": "0x0000000042aBB12Bc4935734b69f9745B803E076",
+      "address": "0x00000000034C59993500438C8f03867e6E906550",
       "name": "OwnerOf_Art",
       "startBlock": 5488753
     }
