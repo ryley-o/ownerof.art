@@ -9,7 +9,13 @@
   "private": false,
   "scripts": {
     "subgraph:build:generic": "yarn subgraph:prepare:generic && graph codegen && graph build",
+    "subgraph:deploy:mainnet": "yarn subgraph:prepare:mainnet && graph codegen && graph deploy --product hosted-service ryley-o/ownerof-art-mainnet",
+    "subgraph:deploy:arbitrum": "yarn subgraph:prepare:arbitrum && graph codegen && graph deploy --product hosted-service ryley-o/ownerof-art-arbitrum",
+    "subgraph:deploy:optimism": "yarn subgraph:prepare:optimism && graph codegen && graph deploy --product hosted-service ryley-o/ownerof-art-optimism",
     "subgraph:deploy:sepolia": "yarn subgraph:prepare:sepolia && graph codegen && graph deploy --product hosted-service ryley-o/ownerof-art-sepolia",
+    "subgraph:prepare:mainnet": "mustache config/mainnet.json subgraph.template.yaml > subgraph.yaml",
+    "subgraph:prepare:arbitrum": "mustache config/arbitrum.json subgraph.template.yaml > subgraph.yaml",
+    "subgraph:prepare:optimism": "mustache config/optimism.json subgraph.template.yaml > subgraph.yaml",
     "subgraph:prepare:sepolia": "mustache config/sepolia.json subgraph.template.yaml > subgraph.yaml",
     "subgraph:prepare:generic": "mustache config/generic.json subgraph.template.yaml > subgraph.yaml"
   },

@@ -1,0 +1,10 @@
+{
+  "network": "optimism",
+  "iOwnerOf_ArtContracts": [
+    {
+      "address": "0x00000000034C59993500438C8f03867e6E906550",
+      "name": "OwnerOf_Art",
+      "startBlock": 117701898
+    }
+  ]
+}
