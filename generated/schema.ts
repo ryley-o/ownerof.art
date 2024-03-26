@@ -367,6 +367,19 @@ export class Message extends Entity {
     this.set("blockNumber", Value.fromBigInt(value));
   }
 
+  get network(): string {
+    let value = this.get("network");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toString();
+    }
+  }
+
+  set network(value: string) {
+    this.set("network", Value.fromString(value));
+  }
+
   get timestamp(): BigInt {
     let value = this.get("timestamp");
     if (!value || value.kind == ValueKind.NULL) {

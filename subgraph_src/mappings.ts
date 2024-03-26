@@ -1,5 +1,5 @@
 // standard library
-import { BigInt, log, Address } from "@graphprotocol/graph-ts";
+import { BigInt, log, Address, dataSource } from "@graphprotocol/graph-ts";
 // events
 import {
   MessagePosted,
@@ -45,6 +45,7 @@ export function handleMessagePosted(event: MessagePosted): void {
   message.bytecodeAddress = event.params.bytecodeStorageAddress;
   message.txHash = event.transaction.hash;
   message.blockNumber = event.block.number;
+  message.network = dataSource.network();
   message.timestamp = event.block.timestamp;
 
   message.save();

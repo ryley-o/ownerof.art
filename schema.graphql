@@ -71,6 +71,9 @@ type Message @entity {
   "Block number of when the message was posted"
   blockNumber: BigInt!
 
+  "Network that the message was posted on"
+  network: String!
+
   "Timestamp of when the message was posted"
   timestamp: BigInt!
 }
